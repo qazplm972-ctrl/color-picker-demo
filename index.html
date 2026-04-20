@@ -328,26 +328,6 @@
         color: var(--text);
       }
 
-      .picker-clear {
-        display: none;
-        align-items: center;
-        justify-content: center;
-        width: 32px;
-        background: none;
-        border: none;
-        cursor: pointer;
-        color: var(--text-light);
-        font-size: 16px;
-      }
-
-      .picker-clear:hover {
-        color: var(--text);
-      }
-
-      .picker.has-value .picker-clear {
-        display: flex;
-      }
-
       .picker-dropdown {
         position: absolute;
         top: calc(100% + 6px);
@@ -562,7 +542,6 @@
                     ×
                   </button>
                 </span>
-                <button class="picker-clear" aria-label="清除">×</button>
               </div>
             </div>
             <p class="error-msg">不得為空</p>
@@ -600,7 +579,6 @@
                     ×
                   </button>
                 </span>
-                <button class="picker-clear" aria-label="清除">×</button>
               </div>
             </div>
             <p class="error-msg">不得為空</p>
@@ -638,7 +616,6 @@
                     ×
                   </button>
                 </span>
-                <button class="picker-clear" aria-label="清除">×</button>
               </div>
             </div>
             <p class="error-msg">不得為空</p>
@@ -799,7 +776,6 @@
         const tokenEl = picker.querySelector(".picker-token");
         const tokenNameEl = picker.querySelector(".picker-token-name");
         const unbindBtn = picker.querySelector(".picker-token-unbind");
-        const clearBtn = picker.querySelector(".picker-clear");
 
         const initialName = picker.dataset.initialToken || "";
         const dropdown = buildDropdown(initialName);
@@ -912,15 +888,6 @@
             .forEach((el) => el.classList.remove("is-active"));
           item.classList.add("is-active");
           picker.classList.remove("is-open");
-        });
-
-        clearBtn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          updateState(null);
-          dropdown
-            .querySelectorAll(".dropdown-item")
-            .forEach((el) => el.classList.remove("is-active"));
-          input.focus();
         });
 
         // 解除參數綁定：保留 Hex 但移除 token chip 與 dropdown 的 active
