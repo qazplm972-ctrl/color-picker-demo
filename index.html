@@ -286,9 +286,10 @@
       }
 
       .picker-token {
-        padding: 0 12px;
+        padding: 0 6px 0 12px;
         display: none;
         align-items: center;
+        gap: 6px;
         font-size: 0.8rem;
         color: var(--text-secondary);
         border-left: 1px solid var(--border-light);
@@ -297,6 +298,34 @@
 
       .picker.has-token .picker-token {
         display: flex;
+      }
+
+      .picker-token-name {
+        line-height: 1;
+      }
+
+      .picker-token-unbind {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: none;
+        background: var(--border-light);
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-size: 12px;
+        line-height: 1;
+        padding: 0;
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+
+      .picker-token-unbind:hover {
+        background: var(--border);
+        color: var(--text);
       }
 
       .picker-clear {
@@ -522,7 +551,17 @@
                   placeholder="輸入 Hex 或選擇參數"
                   maxlength="7"
                 />
-                <span class="picker-token"></span>
+                <span class="picker-token">
+                  <span class="picker-token-name"></span>
+                  <button
+                    type="button"
+                    class="picker-token-unbind"
+                    aria-label="解除參數綁定"
+                    title="解除參數綁定"
+                  >
+                    ×
+                  </button>
+                </span>
                 <button class="picker-clear" aria-label="清除">×</button>
               </div>
             </div>
@@ -550,7 +589,17 @@
                   value="#EAF9DE"
                   maxlength="7"
                 />
-                <span class="picker-token"></span>
+                <span class="picker-token">
+                  <span class="picker-token-name"></span>
+                  <button
+                    type="button"
+                    class="picker-token-unbind"
+                    aria-label="解除參數綁定"
+                    title="解除參數綁定"
+                  >
+                    ×
+                  </button>
+                </span>
                 <button class="picker-clear" aria-label="清除">×</button>
               </div>
             </div>
@@ -578,7 +627,17 @@
                   value="#FFD4A8"
                   maxlength="7"
                 />
-                <span class="picker-token">primary</span>
+                <span class="picker-token">
+                  <span class="picker-token-name">primary</span>
+                  <button
+                    type="button"
+                    class="picker-token-unbind"
+                    aria-label="解除參數綁定"
+                    title="解除參數綁定"
+                  >
+                    ×
+                  </button>
+                </span>
                 <button class="picker-clear" aria-label="清除">×</button>
               </div>
             </div>
@@ -610,6 +669,11 @@
             <code>#123123</code>，加快常用色輸入。
           </li>
           <li>已有 Hex 時，再次聚焦會自動全選，方便直接覆寫不必手動清除。</li>
+          <li>
+            參數綁定可解除：選參數後 token chip 旁有
+            <code>×</code>，按下會保留 Hex
+            但解除與設計參數的連結，方便切換成寫死色碼。
+          </li>
         </ul>
       </section>
     </div>
@@ -733,6 +797,8 @@
         const input = picker.querySelector(".picker-input");
         const swatch = picker.querySelector(".picker-swatch");
         const tokenEl = picker.querySelector(".picker-token");
+        const tokenNameEl = picker.querySelector(".picker-token-name");
+        const unbindBtn = picker.querySelector(".picker-token-unbind");
         const clearBtn = picker.querySelector(".picker-clear");
 
         const initialName = picker.dataset.initialToken || "";
@@ -748,7 +814,7 @@
             picker.classList.remove("has-value", "has-token");
             swatch.style.setProperty("--swatch-color", "transparent");
             input.value = "";
-            tokenEl.textContent = "";
+            tokenNameEl.textContent = "";
             revalidate();
             return;
           }
@@ -765,10 +831,10 @@
           }
           picker.classList.add("has-value");
           if (tokenName) {
-            tokenEl.textContent = tokenName;
+            tokenNameEl.textContent = tokenName;
             picker.classList.add("has-token");
           } else {
-            tokenEl.textContent = "";
+            tokenNameEl.textContent = "";
             picker.classList.remove("has-token");
           }
         }
@@ -855,6 +921,16 @@
             .querySelectorAll(".dropdown-item")
             .forEach((el) => el.classList.remove("is-active"));
           input.focus();
+        });
+
+        // 解除參數綁定：保留 Hex 但移除 token chip 與 dropdown 的 active
+        unbindBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          picker.classList.remove("has-token");
+          tokenNameEl.textContent = "";
+          dropdown
+            .querySelectorAll(".dropdown-item")
+            .forEach((el) => el.classList.remove("is-active"));
         });
 
         document.addEventListener("click", (e) => {
