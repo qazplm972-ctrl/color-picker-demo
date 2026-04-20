@@ -1,0 +1,848 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>顏色選擇器改版 Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --bg: #f5f5f7;
+        --surface: #ffffff;
+        --text: #1d1d1f;
+        --text-secondary: #6e6e73;
+        --text-light: #a1a1a6;
+        --border: #e5e5ea;
+        --border-light: #f0f0f3;
+        --accent: #0071e3;
+        --accent-soft: rgba(0, 113, 227, 0.12);
+        --required: #e53e3e;
+      }
+
+      html {
+        font-size: 16px;
+      }
+
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Helvetica Neue",
+          Arial,
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        min-height: 100vh;
+        padding: 48px 24px;
+      }
+
+      .wrap {
+        max-width: 1080px;
+        margin: 0 auto;
+      }
+
+      .page-header {
+        text-align: center;
+        margin-bottom: 48px;
+      }
+
+      .page-header .label {
+        display: inline-block;
+        font-size: 0.75rem;
+        letter-spacing: 0.18em;
+        color: var(--text-light);
+        margin-bottom: 12px;
+        text-transform: uppercase;
+      }
+
+      .page-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+
+      .page-header p {
+        color: var(--text-secondary);
+        max-width: 540px;
+        margin: 0 auto;
+        font-size: 0.95rem;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+      }
+
+      @media (max-width: 880px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 28px;
+        min-height: 600px;
+      }
+
+      .panel-header {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        margin-bottom: 28px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid var(--border-light);
+      }
+
+      .panel-header h2 {
+        font-size: 1.125rem;
+        font-weight: 700;
+      }
+
+      .panel-header .tag {
+        font-size: 0.7rem;
+        letter-spacing: 0.12em;
+        color: var(--text-light);
+        text-transform: uppercase;
+      }
+
+      .state {
+        margin-bottom: 28px;
+      }
+
+      .state-label {
+        display: block;
+        font-size: 0.72rem;
+        color: var(--text-light);
+        margin-bottom: 6px;
+        letter-spacing: 0.04em;
+      }
+
+      .field-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.85rem;
+        color: var(--text);
+        margin-bottom: 8px;
+      }
+
+      .field-label .req {
+        color: var(--required);
+      }
+
+      .field-label .info {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--text-light);
+        color: #fff;
+        font-size: 9px;
+        font-weight: 700;
+      }
+
+      /* ===== 原版 ===== */
+      .legacy-input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        font: inherit;
+        font-size: 0.875rem;
+        background: #fff;
+        color: var(--text);
+        transition: border-color 0.15s;
+      }
+
+      .legacy-input:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-soft);
+      }
+
+      .legacy-input.is-error,
+      .legacy-input.is-error:focus {
+        border-color: var(--required);
+        box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.12);
+      }
+
+      .legacy-hint {
+        margin-top: 8px;
+        font-size: 0.75rem;
+        color: var(--text-light);
+      }
+
+      .error-msg {
+        display: none;
+        margin-top: 6px;
+        font-size: 0.75rem;
+        color: var(--required);
+      }
+
+      .state.has-error .error-msg {
+        display: block;
+      }
+
+      /* ===== 新版 ===== */
+      .picker {
+        position: relative;
+      }
+
+      .picker-control {
+        display: flex;
+        align-items: stretch;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: #fff;
+        overflow: hidden;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
+      }
+
+      .picker.is-open .picker-control,
+      .picker-control:focus-within {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-soft);
+      }
+
+      .picker.is-error .picker-control,
+      .picker.is-error.is-open .picker-control,
+      .picker.is-error .picker-control:focus-within {
+        border-color: var(--required);
+        box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.12);
+      }
+
+      .picker-swatch {
+        width: 38px;
+        flex-shrink: 0;
+        border-right: 1px solid var(--border);
+        cursor: pointer;
+        background-color: #fff;
+        background-image:
+          linear-gradient(45deg, #eee 25%, transparent 25%),
+          linear-gradient(-45deg, #eee 25%, transparent 25%),
+          linear-gradient(45deg, transparent 75%, #eee 75%),
+          linear-gradient(-45deg, transparent 75%, #eee 75%);
+        background-size: 10px 10px;
+        background-position:
+          0 0,
+          0 5px,
+          5px -5px,
+          -5px 0;
+        position: relative;
+      }
+
+      .picker-swatch::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: var(--swatch-color, transparent);
+      }
+
+      .picker-input {
+        flex: 1;
+        min-width: 0;
+        border: none;
+        padding: 10px 12px;
+        font: inherit;
+        font-size: 0.875rem;
+        color: var(--text);
+        background: transparent;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+      }
+
+      .picker-input:focus {
+        outline: none;
+      }
+
+      .picker-input::placeholder {
+        color: var(--text-light);
+        text-transform: none;
+        letter-spacing: 0;
+      }
+
+      .picker-token {
+        padding: 0 12px;
+        display: none;
+        align-items: center;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        border-left: 1px solid var(--border-light);
+        white-space: nowrap;
+      }
+
+      .picker.has-token .picker-token {
+        display: flex;
+      }
+
+      .picker-clear {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--text-light);
+        font-size: 16px;
+      }
+
+      .picker-clear:hover {
+        color: var(--text);
+      }
+
+      .picker.has-value .picker-clear {
+        display: flex;
+      }
+
+      .picker-dropdown {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        right: 0;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        max-height: 280px;
+        overflow-y: auto;
+        z-index: 10;
+        display: none;
+      }
+
+      .picker.is-open .picker-dropdown {
+        display: block;
+      }
+
+      .dropdown-section {
+        padding: 8px 0;
+      }
+
+      .dropdown-section + .dropdown-section {
+        border-top: 1px solid var(--border-light);
+      }
+
+      .dropdown-section-title {
+        padding: 4px 14px;
+        font-size: 0.7rem;
+        color: var(--text-light);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 14px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        color: var(--text);
+        transition: background 0.12s;
+      }
+
+      .dropdown-item:hover,
+      .dropdown-item.is-active {
+        background: var(--border-light);
+      }
+
+      .dropdown-swatch {
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        flex-shrink: 0;
+      }
+
+      .dropdown-name {
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .dropdown-hex {
+        font-size: 0.75rem;
+        color: var(--text-light);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .notes {
+        margin-top: 36px;
+        padding: 24px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+      }
+
+      .notes h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+      }
+
+      .notes ul {
+        list-style: none;
+        display: grid;
+        gap: 8px;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+      }
+
+      .notes li::before {
+        content: "・";
+        margin-right: 4px;
+        color: var(--accent);
+      }
+
+      .notes code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.82em;
+        padding: 1px 6px;
+        background: var(--border-light);
+        border-radius: 4px;
+        color: var(--text);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="page-header">
+        <span class="label">Component Redesign</span>
+        <h1>顏色選擇器改版</h1>
+        <p>
+          從只能輸入文字的單欄位，升級為可預覽、可下拉選參數的雙模輸入體驗。
+        </p>
+      </header>
+
+      <div class="grid">
+        <!-- 原版 -->
+        <section class="panel">
+          <div class="panel-header">
+            <h2>原版</h2>
+            <span class="tag">Before</span>
+          </div>
+
+          <div class="state" data-legacy-state>
+            <span class="state-label"
+              >預設（空值）｜點擊輸入框後離開會出現錯誤提示</span
+            >
+            <label class="field-label">
+              <span class="req">*</span><span class="info">i</span> color :
+            </label>
+            <input
+              type="text"
+              class="legacy-input"
+              placeholder=""
+              data-legacy
+            />
+            <p class="error-msg">不得為空</p>
+          </div>
+
+          <div class="state" data-legacy-state>
+            <span class="state-label">輸入 Hex</span>
+            <label class="field-label">
+              <span class="req">*</span><span class="info">i</span> color :
+            </label>
+            <input
+              type="text"
+              class="legacy-input"
+              value="#EAF9DE"
+              data-legacy
+            />
+            <p class="error-msg">不得為空</p>
+          </div>
+
+          <div class="state" data-legacy-state>
+            <span class="state-label">輸入參數</span>
+            <label class="field-label">
+              <span class="req">*</span><span class="info">i</span> color :
+            </label>
+            <input
+              type="text"
+              class="legacy-input"
+              value="primary"
+              data-legacy
+            />
+            <p class="error-msg">不得為空</p>
+            <p class="legacy-hint">
+              只能輸入色碼或參數名稱，無法預覽顏色，輸入錯誤時也沒有提示。
+            </p>
+          </div>
+        </section>
+
+        <!-- 新版 -->
+        <section class="panel">
+          <div class="panel-header">
+            <h2>新版</h2>
+            <span class="tag">After</span>
+          </div>
+
+          <div class="state">
+            <span class="state-label"
+              >預設（空值）｜點擊輸入框後離開會出現錯誤提示</span
+            >
+            <label class="field-label">
+              <span class="req">*</span><span class="info">i</span> color :
+            </label>
+            <div class="picker" data-picker>
+              <div class="picker-control">
+                <div
+                  class="picker-swatch"
+                  style="--swatch-color: transparent"
+                ></div>
+                <input
+                  type="text"
+                  class="picker-input"
+                  placeholder="輸入 Hex 或選擇參數"
+                  maxlength="7"
+                />
+                <span class="picker-token"></span>
+                <button class="picker-clear" aria-label="清除">×</button>
+              </div>
+            </div>
+            <p class="error-msg">不得為空</p>
+          </div>
+
+          <div class="state">
+            <span class="state-label">輸入 Hex</span>
+            <label class="field-label">
+              <span class="req">*</span><span class="info">i</span> color :
+            </label>
+            <div
+              class="picker has-value"
+              data-picker
+              data-initial-hex="#EAF9DE"
+            >
+              <div class="picker-control">
+                <div
+                  class="picker-swatch"
+                  style="--swatch-color: #eaf9de"
+                ></div>
+                <input
+                  type="text"
+                  class="picker-input"
+                  value="#EAF9DE"
+                  maxlength="7"
+                />
+                <span class="picker-token"></span>
+                <button class="picker-clear" aria-label="清除">×</button>
+              </div>
+            </div>
+            <p class="error-msg">不得為空</p>
+          </div>
+
+          <div class="state">
+            <span class="state-label">選擇參數（下拉展開中）</span>
+            <label class="field-label">
+              <span class="req">*</span><span class="info">i</span> color :
+            </label>
+            <div
+              class="picker is-open has-value has-token"
+              data-picker
+              data-initial-token="primary"
+            >
+              <div class="picker-control">
+                <div
+                  class="picker-swatch"
+                  style="--swatch-color: #ffd4a8"
+                ></div>
+                <input
+                  type="text"
+                  class="picker-input"
+                  value="#FFD4A8"
+                  maxlength="7"
+                />
+                <span class="picker-token">primary</span>
+                <button class="picker-clear" aria-label="清除">×</button>
+              </div>
+            </div>
+            <p class="error-msg">不得為空</p>
+          </div>
+        </section>
+      </div>
+
+      <section class="notes">
+        <h3>改版重點</h3>
+        <ul>
+          <li>左側即時預覽，輸入後立刻看到顏色，不需腦中換算。</li>
+          <li>
+            下拉選單彙整現有設計參數（assist / primary /
+            functional），降低記憶成本。
+          </li>
+          <li>參數與 Hex 雙向支援：選參數會自動填入 Hex，反之亦然。</li>
+          <li>狀態清楚：預設、Hex 輸入中、已選參數三種樣式區分明確。</li>
+          <li>
+            必填驗證：點擊輸入框後離開若為空，立即顯示紅框與「不得為空」提示。
+          </li>
+          <li>
+            輸入框自動帶入 <code>#</code>，並限制最多 6 碼 Hex
+            字元，避免格式錯誤。
+          </li>
+          <li>
+            智能展開：輸入 1 碼 <code>F</code> 自動補成 <code>#FFFFFF</code>、2
+            碼 <code>14</code> → <code>#141414</code>、3 碼 <code>123</code> →
+            <code>#123123</code>，加快常用色輸入。
+          </li>
+          <li>已有 Hex 時，再次聚焦會自動全選，方便直接覆寫不必手動清除。</li>
+        </ul>
+      </section>
+    </div>
+
+    <script>
+      const TOKENS = {
+        Assist: [
+          { name: "assistBackground", hex: "#1A1A1A" },
+          { name: "assistBackground2", hex: "#2A2A2A" },
+          { name: "assistBasicLine", hex: "#3D3D3D" },
+          { name: "assistBasicLine2", hex: "#5C5C5C" },
+          { name: "assistBasicSecondary", hex: "#8A8A8A" },
+          { name: "assistBasicSecondary2", hex: "#B8B8B8" },
+        ],
+        Primary: [
+          { name: "primary", hex: "#FFD4A8" },
+          { name: "primaryGradient", hex: "#F0B080" },
+          { name: "basicText", hex: "#FFFFFF" },
+          { name: "basicText2", hex: "#000000" },
+          { name: "basicRise", hex: "#FF4D4D" },
+          { name: "basicFall", hex: "#2DBB85" },
+        ],
+        Functional: [
+          { name: "functional1", hex: "#FF9933" },
+          { name: "functional2", hex: "#FFEB66" },
+          { name: "functional3", hex: "#6655FF" },
+          { name: "functional4", hex: "#00B0FF" },
+          { name: "functional5", hex: "#FF3D8A" },
+          { name: "functional6", hex: "#00E5A8" },
+          { name: "functional7", hex: "#FF7A8A" },
+          { name: "functional8", hex: "#D5A8FF" },
+        ],
+      };
+
+      const ALL_TOKENS = Object.values(TOKENS).flat();
+      const tokenByName = Object.fromEntries(
+        ALL_TOKENS.map((t) => [t.name.toLowerCase(), t]),
+      );
+      const tokenByHex = Object.fromEntries(
+        ALL_TOKENS.map((t) => [t.hex.toLowerCase(), t]),
+      );
+
+      function buildDropdown(activeName) {
+        const dd = document.createElement("div");
+        dd.className = "picker-dropdown";
+        Object.entries(TOKENS).forEach(([section, items]) => {
+          const sec = document.createElement("div");
+          sec.className = "dropdown-section";
+          const title = document.createElement("div");
+          title.className = "dropdown-section-title";
+          title.textContent = section;
+          sec.appendChild(title);
+          items.forEach((token) => {
+            const item = document.createElement("div");
+            item.className = "dropdown-item";
+            if (token.name === activeName) item.classList.add("is-active");
+            item.dataset.name = token.name;
+            item.dataset.hex = token.hex;
+            item.innerHTML = `
+              <span class="dropdown-swatch" style="background:${token.hex}"></span>
+              <span class="dropdown-name">${token.name}</span>
+              <span class="dropdown-hex">${token.hex}</span>
+            `;
+            sec.appendChild(item);
+          });
+          dd.appendChild(sec);
+        });
+        return dd;
+      }
+
+      function isHex(value) {
+        return /^#?[0-9a-fA-F]{6}$/.test(value.trim());
+      }
+
+      function normalizeHex(value) {
+        const v = value.trim();
+        return v.startsWith("#") ? v.toUpperCase() : "#" + v.toUpperCase();
+      }
+
+      /* ===== 必填驗證 ===== */
+      function setupValidation(field, input, getValue) {
+        const state = field.closest(".state");
+        let touched = false;
+
+        function validate() {
+          const empty = !getValue().trim();
+          if (touched && empty) {
+            state.classList.add("has-error");
+            input.classList.add("is-error");
+            field.classList.add("is-error");
+          } else {
+            state.classList.remove("has-error");
+            input.classList.remove("is-error");
+            field.classList.remove("is-error");
+          }
+        }
+
+        input.addEventListener("blur", () => {
+          touched = true;
+          validate();
+        });
+        input.addEventListener("input", validate);
+        return validate;
+      }
+
+      document.querySelectorAll("[data-legacy]").forEach((input) => {
+        setupValidation(input, input, () => input.value);
+      });
+
+      function setupPicker(picker) {
+        const input = picker.querySelector(".picker-input");
+        const swatch = picker.querySelector(".picker-swatch");
+        const tokenEl = picker.querySelector(".picker-token");
+        const clearBtn = picker.querySelector(".picker-clear");
+
+        const initialName = picker.dataset.initialToken || "";
+        const dropdown = buildDropdown(initialName);
+        picker.appendChild(dropdown);
+
+        const revalidate = setupValidation(picker, input, () =>
+          input.value === "#" ? "" : input.value,
+        );
+
+        function updateState(hex, tokenName) {
+          if (!hex) {
+            picker.classList.remove("has-value", "has-token");
+            swatch.style.setProperty("--swatch-color", "transparent");
+            input.value = "";
+            tokenEl.textContent = "";
+            revalidate();
+            return;
+          }
+          const normalized = normalizeHex(hex);
+          swatch.style.setProperty("--swatch-color", normalized);
+          input.value = normalized;
+          picker.classList.add("has-value");
+          if (tokenName) {
+            tokenEl.textContent = tokenName;
+            picker.classList.add("has-token");
+          } else {
+            tokenEl.textContent = "";
+            picker.classList.remove("has-token");
+          }
+        }
+
+        function open() {
+          document.querySelectorAll(".picker.is-open").forEach((p) => {
+            if (p !== picker) p.classList.remove("is-open");
+          });
+          picker.classList.add("is-open");
+        }
+
+        input.addEventListener("focus", () => {
+          if (!input.value) {
+            input.value = "#";
+          } else if (input.value.length > 1) {
+            // 已有 Hex 內容：自動全選方便覆寫
+            setTimeout(() => input.select(), 0);
+          }
+          open();
+        });
+        swatch.addEventListener("click", () => input.focus());
+
+        input.addEventListener("blur", () => {
+          const raw = input.value.replace(/^#/, "");
+
+          // 空值：清掉 # 讓必填驗證生效
+          if (raw.length === 0) {
+            input.value = "";
+            revalidate();
+            return;
+          }
+
+          // 智能展開：1→6、2→3、3→2 倍重複
+          let expanded = raw;
+          if (raw.length === 1) expanded = raw.repeat(6);
+          else if (raw.length === 2) expanded = raw.repeat(3);
+          else if (raw.length === 3) expanded = raw.repeat(2);
+
+          if (expanded.length === 6) {
+            const normalized = "#" + expanded.toUpperCase();
+            const matched = tokenByHex[normalized.toLowerCase()];
+            updateState(normalized, matched ? matched.name : "");
+          }
+        });
+
+        input.addEventListener("input", (e) => {
+          // 自動帶入 # + 限制最多 6 碼 hex
+          const raw = e.target.value
+            .replace(/[^0-9a-fA-F]/g, "")
+            .slice(0, 6)
+            .toUpperCase();
+          e.target.value = "#" + raw;
+
+          if (raw.length === 6) {
+            const normalized = "#" + raw;
+            const matched = tokenByHex[normalized.toLowerCase()];
+            updateState(normalized, matched ? matched.name : "");
+          } else {
+            // 還在輸入中：清掉預覽但保留輸入內容
+            picker.classList.remove("has-value", "has-token");
+            swatch.style.setProperty("--swatch-color", "transparent");
+            tokenEl.textContent = "";
+          }
+        });
+
+        dropdown.addEventListener("click", (e) => {
+          const item = e.target.closest(".dropdown-item");
+          if (!item) return;
+          updateState(item.dataset.hex, item.dataset.name);
+          dropdown
+            .querySelectorAll(".dropdown-item")
+            .forEach((el) => el.classList.remove("is-active"));
+          item.classList.add("is-active");
+          picker.classList.remove("is-open");
+        });
+
+        clearBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          updateState(null);
+          dropdown
+            .querySelectorAll(".dropdown-item")
+            .forEach((el) => el.classList.remove("is-active"));
+          input.focus();
+        });
+
+        document.addEventListener("click", (e) => {
+          if (!picker.contains(e.target)) {
+            picker.classList.remove("is-open");
+          }
+        });
+      }
+
+      document.querySelectorAll("[data-picker]").forEach(setupPicker);
+    </script>
+  </body>
+</html>
