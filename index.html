@@ -389,6 +389,7 @@
         font-size: 0.75rem;
         color: var(--text-light);
         font-variant-numeric: tabular-nums;
+        white-space: nowrap;
       }
 
       .notes {
@@ -625,7 +626,11 @@
         ],
         Primary: [
           { name: "primary", hex: "#FFD4A8" },
-          { name: "primaryGradient", hex: "#F0B080" },
+          {
+            name: "primaryGradient",
+            hex: "#FDD39B-#E5B87B",
+            gradient: ["#FDD39B", "#E5B87B"],
+          },
           { name: "basicText", hex: "#FFFFFF" },
           { name: "basicText2", hex: "#000000" },
           { name: "basicRise", hex: "#FF4D4D" },
@@ -667,8 +672,14 @@
             if (token.name === activeName) item.classList.add("is-active");
             item.dataset.name = token.name;
             item.dataset.hex = token.hex;
+            if (token.gradient) {
+              item.dataset.gradient = token.gradient.join(",");
+            }
+            const swatchBg = token.gradient
+              ? `linear-gradient(135deg, ${token.gradient[0]}, ${token.gradient[1]})`
+              : token.hex;
             item.innerHTML = `
-              <span class="dropdown-swatch" style="background:${token.hex}"></span>
+              <span class="dropdown-swatch" style="background:${swatchBg}"></span>
               <span class="dropdown-name">${token.name}</span>
               <span class="dropdown-hex">${token.hex}</span>
             `;
@@ -732,7 +743,7 @@
           input.value === "#" ? "" : input.value,
         );
 
-        function updateState(hex, tokenName) {
+        function updateState(hex, tokenName, gradient) {
           if (!hex) {
             picker.classList.remove("has-value", "has-token");
             swatch.style.setProperty("--swatch-color", "transparent");
@@ -741,9 +752,17 @@
             revalidate();
             return;
           }
-          const normalized = normalizeHex(hex);
-          swatch.style.setProperty("--swatch-color", normalized);
-          input.value = normalized;
+          if (gradient) {
+            swatch.style.setProperty(
+              "--swatch-color",
+              `linear-gradient(135deg, ${gradient[0]}, ${gradient[1]})`,
+            );
+            input.value = hex;
+          } else {
+            const normalized = normalizeHex(hex);
+            swatch.style.setProperty("--swatch-color", normalized);
+            input.value = normalized;
+          }
           picker.classList.add("has-value");
           if (tokenName) {
             tokenEl.textContent = tokenName;
@@ -818,7 +837,10 @@
         dropdown.addEventListener("click", (e) => {
           const item = e.target.closest(".dropdown-item");
           if (!item) return;
-          updateState(item.dataset.hex, item.dataset.name);
+          const gradient = item.dataset.gradient
+            ? item.dataset.gradient.split(",")
+            : null;
+          updateState(item.dataset.hex, item.dataset.name, gradient);
           dropdown
             .querySelectorAll(".dropdown-item")
             .forEach((el) => el.classList.remove("is-active"));
