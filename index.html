@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>顏色選擇器改版 Demo</title>
+    <title>GUI Tool 元件改版 Demo</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -437,221 +437,612 @@
         border-radius: 4px;
         color: var(--text);
       }
+
+      /* ===== 頁籤 ===== */
+      .tabs {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 32px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .tab {
+        padding: 12px 20px;
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        font: inherit;
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+        cursor: pointer;
+        margin-bottom: -1px;
+        transition:
+          color 0.15s,
+          border-color 0.15s;
+      }
+
+      .tab:hover {
+        color: var(--text);
+      }
+
+      .tab.is-active {
+        color: var(--text);
+        border-bottom-color: var(--accent);
+        font-weight: 700;
+      }
+
+      .view {
+        display: none;
+      }
+
+      .view.is-active {
+        display: block;
+      }
+
+      /* ===== Select / Dropdown 元件（displayPattern） ===== */
+      .select {
+        position: relative;
+      }
+
+      .select-control {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: #fff;
+        cursor: pointer;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
+        min-height: 40px;
+      }
+
+      .select.is-open .select-control {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-soft);
+      }
+
+      .select.is-error .select-control {
+        border-color: var(--required);
+        box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.12);
+      }
+
+      .select-value {
+        flex: 1;
+        font-size: 0.875rem;
+        color: var(--text);
+      }
+
+      .select-value.is-placeholder {
+        color: var(--text-light);
+      }
+
+      .select-chevron {
+        width: 18px;
+        height: 18px;
+        color: var(--text-secondary);
+        transition: transform 0.2s;
+        flex-shrink: 0;
+      }
+
+      .select.is-open .select-chevron {
+        transform: rotate(180deg);
+      }
+
+      .select-menu {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        z-index: 10;
+        display: none;
+        overflow: hidden;
+      }
+
+      .select.is-open .select-menu {
+        display: block;
+      }
+
+      .select-option {
+        padding: 10px 14px;
+        font-size: 0.875rem;
+        color: var(--text);
+        cursor: pointer;
+        transition: background 0.12s;
+      }
+
+      .select-option:hover,
+      .select-option.is-active {
+        background: var(--border-light);
+      }
+
+      /* decimal 額外設定區塊 */
+      .decimal-extra {
+        display: none;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.875rem;
+        color: var(--text);
+      }
+
+      .decimal-extra.is-visible {
+        display: inline-flex;
+      }
+
+      .stepper {
+        display: inline-flex;
+        align-items: center;
+        width: 56px;
+        height: 36px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: #fff;
+      }
+
+      .stepper input {
+        width: 100%;
+        height: 100%;
+        border: none;
+        background: transparent;
+        text-align: center;
+        font: inherit;
+        font-size: 0.875rem;
+        color: var(--text);
+        -moz-appearance: textfield;
+      }
+
+      .stepper input::-webkit-outer-spin-button,
+      .stepper input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      .stepper input:focus {
+        outline: none;
+      }
+
+      .stepper:focus-within {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-soft);
+      }
+
+      .decimal-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .decimal-row .select {
+        flex: 1;
+        min-width: 200px;
+      }
     </style>
   </head>
   <body>
     <div class="wrap">
-      <header class="page-header">
-        <span class="label">Component Redesign</span>
-        <h1>顏色選擇器改版</h1>
-        <p>
-          從只能輸入文字的單欄位，升級為可預覽、可下拉選參數的雙模輸入體驗。
-        </p>
-      </header>
+      <nav class="tabs" role="tablist">
+        <button class="tab is-active" data-tab="color" role="tab">color</button>
+        <button class="tab" data-tab="displayPattern" role="tab">
+          displayPattern
+        </button>
+      </nav>
 
-      <div class="grid">
-        <!-- 原版 -->
-        <section class="panel">
-          <div class="panel-header">
-            <h2>原版</h2>
-            <span class="tag">Before</span>
-          </div>
+      <section class="view is-active" data-view="color">
+        <header class="page-header">
+          <span class="label">Component Redesign</span>
+          <h1>顏色選擇器改版</h1>
+          <p>
+            從只能輸入文字的單欄位，升級為可預覽、可下拉選參數的雙模輸入體驗。
+          </p>
+        </header>
 
-          <div class="state" data-legacy-state>
-            <span class="state-label"
-              >預設（空值）｜點擊輸入框後離開會出現錯誤提示</span
-            >
-            <label class="field-label">
-              <span class="req">*</span><span class="info">i</span> color :
-            </label>
-            <input
-              type="text"
-              class="legacy-input"
-              placeholder=""
-              data-legacy
-            />
-            <p class="error-msg">不得為空</p>
-          </div>
+        <div class="grid">
+          <!-- 原版 -->
+          <section class="panel">
+            <div class="panel-header">
+              <h2>原版</h2>
+              <span class="tag">Before</span>
+            </div>
 
-          <div class="state" data-legacy-state>
-            <span class="state-label">輸入 Hex</span>
-            <label class="field-label">
-              <span class="req">*</span><span class="info">i</span> color :
-            </label>
-            <input
-              type="text"
-              class="legacy-input"
-              value="#EAF9DE"
-              data-legacy
-            />
-            <p class="error-msg">不得為空</p>
-          </div>
+            <div class="state" data-legacy-state>
+              <span class="state-label"
+                >預設（空值）｜點擊輸入框後離開會出現錯誤提示</span
+              >
+              <label class="field-label">
+                <span class="req">*</span><span class="info">i</span> color :
+              </label>
+              <input
+                type="text"
+                class="legacy-input"
+                placeholder=""
+                data-legacy
+              />
+              <p class="error-msg">不得為空</p>
+            </div>
 
-          <div class="state" data-legacy-state>
-            <span class="state-label">輸入參數</span>
-            <label class="field-label">
-              <span class="req">*</span><span class="info">i</span> color :
-            </label>
-            <input
-              type="text"
-              class="legacy-input"
-              value="primary"
-              data-legacy
-            />
-            <p class="error-msg">不得為空</p>
-            <p class="legacy-hint">
-              只能輸入色碼或參數名稱，無法預覽顏色，輸入錯誤時也沒有提示。
-            </p>
-          </div>
+            <div class="state" data-legacy-state>
+              <span class="state-label">輸入 Hex</span>
+              <label class="field-label">
+                <span class="req">*</span><span class="info">i</span> color :
+              </label>
+              <input
+                type="text"
+                class="legacy-input"
+                value="#EAF9DE"
+                data-legacy
+              />
+              <p class="error-msg">不得為空</p>
+            </div>
+
+            <div class="state" data-legacy-state>
+              <span class="state-label">輸入參數</span>
+              <label class="field-label">
+                <span class="req">*</span><span class="info">i</span> color :
+              </label>
+              <input
+                type="text"
+                class="legacy-input"
+                value="primary"
+                data-legacy
+              />
+              <p class="error-msg">不得為空</p>
+              <p class="legacy-hint">
+                只能輸入色碼或參數名稱，無法預覽顏色，輸入錯誤時也沒有提示。
+              </p>
+            </div>
+          </section>
+
+          <!-- 新版 -->
+          <section class="panel">
+            <div class="panel-header">
+              <h2>新版</h2>
+              <span class="tag">After</span>
+            </div>
+
+            <div class="state">
+              <span class="state-label"
+                >預設（空值）｜點擊輸入框後離開會出現錯誤提示</span
+              >
+              <label class="field-label">
+                <span class="req">*</span><span class="info">i</span> color :
+              </label>
+              <div class="picker" data-picker>
+                <div class="picker-control">
+                  <div
+                    class="picker-swatch"
+                    style="--swatch-color: transparent"
+                  ></div>
+                  <input
+                    type="text"
+                    class="picker-input"
+                    placeholder="輸入 Hex 或選擇參數"
+                    maxlength="7"
+                  />
+                  <span class="picker-token">
+                    <span class="picker-token-name"></span>
+                    <button
+                      type="button"
+                      class="picker-token-unbind"
+                      aria-label="解除參數綁定"
+                      title="解除參數綁定"
+                    >
+                      ×
+                    </button>
+                  </span>
+                </div>
+              </div>
+              <p class="error-msg">不得為空</p>
+            </div>
+
+            <div class="state">
+              <span class="state-label">輸入 Hex</span>
+              <label class="field-label">
+                <span class="req">*</span><span class="info">i</span> color :
+              </label>
+              <div
+                class="picker has-value"
+                data-picker
+                data-initial-hex="#EAF9DE"
+              >
+                <div class="picker-control">
+                  <div
+                    class="picker-swatch"
+                    style="--swatch-color: #eaf9de"
+                  ></div>
+                  <input
+                    type="text"
+                    class="picker-input"
+                    value="#EAF9DE"
+                    maxlength="7"
+                  />
+                  <span class="picker-token">
+                    <span class="picker-token-name"></span>
+                    <button
+                      type="button"
+                      class="picker-token-unbind"
+                      aria-label="解除參數綁定"
+                      title="解除參數綁定"
+                    >
+                      ×
+                    </button>
+                  </span>
+                </div>
+              </div>
+              <p class="error-msg">不得為空</p>
+            </div>
+
+            <div class="state">
+              <span class="state-label">選擇參數（下拉展開中）</span>
+              <label class="field-label">
+                <span class="req">*</span><span class="info">i</span> color :
+              </label>
+              <div
+                class="picker is-open has-value has-token"
+                data-picker
+                data-initial-token="primary"
+              >
+                <div class="picker-control">
+                  <div
+                    class="picker-swatch"
+                    style="--swatch-color: #ffd4a8"
+                  ></div>
+                  <input
+                    type="text"
+                    class="picker-input"
+                    value="#FFD4A8"
+                    maxlength="7"
+                  />
+                  <span class="picker-token">
+                    <span class="picker-token-name">primary</span>
+                    <button
+                      type="button"
+                      class="picker-token-unbind"
+                      aria-label="解除參數綁定"
+                      title="解除參數綁定"
+                    >
+                      ×
+                    </button>
+                  </span>
+                </div>
+              </div>
+              <p class="error-msg">不得為空</p>
+            </div>
+          </section>
+        </div>
+
+        <section class="notes">
+          <h3>改版重點</h3>
+          <ul>
+            <li>左側即時預覽，輸入後立刻看到顏色，不需腦中換算。</li>
+            <li>
+              下拉選單彙整現有設計參數（assist / primary /
+              functional），降低記憶成本。
+            </li>
+            <li>參數與 Hex 雙向支援：選參數會自動填入 Hex，反之亦然。</li>
+            <li>狀態清楚：預設、Hex 輸入中、已選參數三種樣式區分明確。</li>
+            <li>
+              必填驗證：點擊輸入框後離開若為空，立即顯示紅框與「不得為空」提示。
+            </li>
+            <li>
+              輸入框自動帶入 <code>#</code>，並限制最多 6 碼 Hex
+              字元，避免格式錯誤。
+            </li>
+            <li>
+              智能展開：輸入 1 碼 <code>F</code> 自動補成
+              <code>#FFFFFF</code>、2 碼 <code>14</code> →
+              <code>#141414</code>、3 碼 <code>123</code> →
+              <code>#123123</code>，加快常用色輸入。
+            </li>
+            <li>已有 Hex 時，再次聚焦會自動全選，方便直接覆寫不必手動清除。</li>
+            <li>
+              參數綁定可解除：選參數後 token chip 旁有
+              <code>×</code>，按下會保留 Hex
+              但解除與設計參數的連結，方便切換成寫死色碼。
+            </li>
+          </ul>
         </section>
+      </section>
 
-        <!-- 新版 -->
-        <section class="panel">
-          <div class="panel-header">
-            <h2>新版</h2>
-            <span class="tag">After</span>
-          </div>
+      <section class="view" data-view="displayPattern">
+        <header class="page-header">
+          <span class="label">Component Redesign</span>
+          <h1>displayPattern 改版</h1>
+          <p>
+            從讓使用者自由輸入格式字串，改為清楚的下拉選單，並針對小數提供位數設定。
+          </p>
+        </header>
 
-          <div class="state">
-            <span class="state-label"
-              >預設（空值）｜點擊輸入框後離開會出現錯誤提示</span
-            >
-            <label class="field-label">
-              <span class="req">*</span><span class="info">i</span> color :
-            </label>
-            <div class="picker" data-picker>
-              <div class="picker-control">
-                <div
-                  class="picker-swatch"
-                  style="--swatch-color: transparent"
-                ></div>
-                <input
-                  type="text"
-                  class="picker-input"
-                  placeholder="輸入 Hex 或選擇參數"
-                  maxlength="7"
-                />
-                <span class="picker-token">
-                  <span class="picker-token-name"></span>
-                  <button
-                    type="button"
-                    class="picker-token-unbind"
-                    aria-label="解除參數綁定"
-                    title="解除參數綁定"
+        <div class="grid">
+          <!-- 原版 -->
+          <section class="panel">
+            <div class="panel-header">
+              <h2>原版</h2>
+              <span class="tag">Before</span>
+            </div>
+
+            <div class="state" data-dp-legacy-state>
+              <span class="state-label"
+                >預設（空值）｜點擊輸入框後離開會出現錯誤提示</span
+              >
+              <label class="field-label">
+                <span class="req">*</span><span class="info">i</span>
+                displayPattern :
+              </label>
+              <input
+                type="text"
+                class="legacy-input"
+                placeholder="輸入格式字串"
+                data-dp-legacy
+              />
+              <p class="error-msg">不得為空</p>
+            </div>
+
+            <div class="state" data-dp-legacy-state>
+              <span class="state-label">輸入「字串」</span>
+              <label class="field-label">
+                <span class="req">*</span><span class="info">i</span>
+                displayPattern :
+              </label>
+              <input
+                type="text"
+                class="legacy-input"
+                value="字串"
+                data-dp-legacy
+              />
+              <p class="error-msg">不得為空</p>
+            </div>
+
+            <div class="state" data-dp-legacy-state>
+              <span class="state-label">輸入「0.00」（自訂小數位）</span>
+              <label class="field-label">
+                <span class="req">*</span><span class="info">i</span>
+                displayPattern :
+              </label>
+              <input
+                type="text"
+                class="legacy-input"
+                value="0.00"
+                data-dp-legacy
+              />
+              <p class="error-msg">不得為空</p>
+              <p class="legacy-hint">
+                只能輸入文字，無格式驗證；使用者得自己記住「字串 / 整數 / 0.0 /
+                0.00」之類的規則，容易輸錯。
+              </p>
+            </div>
+          </section>
+
+          <!-- 新版 -->
+          <section class="panel">
+            <div class="panel-header">
+              <h2>新版</h2>
+              <span class="tag">After</span>
+            </div>
+
+            <div class="state">
+              <span class="state-label">預設</span>
+              <label class="field-label">
+                <span class="req">*</span><span class="info">i</span>
+                displayPattern :
+              </label>
+              <div
+                class="select"
+                data-dp-select
+                data-options='[{"value":"string","label":"字串"},{"value":"integer","label":"整數"},{"value":"decimal","label":"小數"}]'
+              >
+                <div class="select-control" tabindex="0">
+                  <span class="select-value is-placeholder">字串</span>
+                  <svg
+                    class="select-chevron"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
                   >
-                    ×
-                  </button>
+                    <path
+                      d="M5 7.5l5 5 5-5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div class="state">
+              <span class="state-label">下拉展開</span>
+              <label class="field-label">
+                <span class="req">*</span><span class="info">i</span>
+                displayPattern :
+              </label>
+              <div
+                class="select is-open"
+                data-dp-select
+                data-options='[{"value":"string","label":"字串"},{"value":"integer","label":"整數"},{"value":"decimal","label":"小數"}]'
+                data-initial="string"
+              >
+                <div class="select-control" tabindex="0">
+                  <span class="select-value">字串</span>
+                  <svg
+                    class="select-chevron"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  >
+                    <path
+                      d="M5 7.5l5 5 5-5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div class="state">
+              <span class="state-label">選擇「小數」（多出取位設定）</span>
+              <label class="field-label">
+                <span class="req">*</span><span class="info">i</span>
+                displayPattern :
+              </label>
+              <div class="decimal-row">
+                <div
+                  class="select"
+                  data-dp-select
+                  data-options='[{"value":"string","label":"字串"},{"value":"integer","label":"整數"},{"value":"decimal","label":"小數"}]'
+                  data-initial="decimal"
+                >
+                  <div class="select-control" tabindex="0">
+                    <span class="select-value">小數</span>
+                    <svg
+                      class="select-chevron"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                    >
+                      <path
+                        d="M5 7.5l5 5 5-5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <span class="decimal-extra is-visible" data-decimal-extra>
+                  取到小數第
+                  <span class="stepper">
+                    <input type="number" min="0" max="10" value="1" />
+                  </span>
+                  位
                 </span>
               </div>
             </div>
-            <p class="error-msg">不得為空</p>
-          </div>
+          </section>
+        </div>
 
-          <div class="state">
-            <span class="state-label">輸入 Hex</span>
-            <label class="field-label">
-              <span class="req">*</span><span class="info">i</span> color :
-            </label>
-            <div
-              class="picker has-value"
-              data-picker
-              data-initial-hex="#EAF9DE"
-            >
-              <div class="picker-control">
-                <div
-                  class="picker-swatch"
-                  style="--swatch-color: #eaf9de"
-                ></div>
-                <input
-                  type="text"
-                  class="picker-input"
-                  value="#EAF9DE"
-                  maxlength="7"
-                />
-                <span class="picker-token">
-                  <span class="picker-token-name"></span>
-                  <button
-                    type="button"
-                    class="picker-token-unbind"
-                    aria-label="解除參數綁定"
-                    title="解除參數綁定"
-                  >
-                    ×
-                  </button>
-                </span>
-              </div>
-            </div>
-            <p class="error-msg">不得為空</p>
-          </div>
-
-          <div class="state">
-            <span class="state-label">選擇參數（下拉展開中）</span>
-            <label class="field-label">
-              <span class="req">*</span><span class="info">i</span> color :
-            </label>
-            <div
-              class="picker is-open has-value has-token"
-              data-picker
-              data-initial-token="primary"
-            >
-              <div class="picker-control">
-                <div
-                  class="picker-swatch"
-                  style="--swatch-color: #ffd4a8"
-                ></div>
-                <input
-                  type="text"
-                  class="picker-input"
-                  value="#FFD4A8"
-                  maxlength="7"
-                />
-                <span class="picker-token">
-                  <span class="picker-token-name">primary</span>
-                  <button
-                    type="button"
-                    class="picker-token-unbind"
-                    aria-label="解除參數綁定"
-                    title="解除參數綁定"
-                  >
-                    ×
-                  </button>
-                </span>
-              </div>
-            </div>
-            <p class="error-msg">不得為空</p>
-          </div>
+        <section class="notes">
+          <h3>改版重點</h3>
+          <ul>
+            <li>
+              三個明確選項（<code>字串</code>／<code>整數</code>／<code>小數</code>）取代自由輸入，使用者不必背格式規則。
+            </li>
+            <li>
+              選擇「小數」會額外帶出「取到小數第 N
+              位」的計數器，把原本要寫死在格式字串裡的位數抽成獨立欄位。
+            </li>
+            <li>必填驗證：點過後若沒選會顯示紅框與「不得為空」提示。</li>
+            <li>下拉展開時 chevron 會旋轉，提供清楚的開合視覺回饋。</li>
+          </ul>
         </section>
-      </div>
-
-      <section class="notes">
-        <h3>改版重點</h3>
-        <ul>
-          <li>左側即時預覽，輸入後立刻看到顏色，不需腦中換算。</li>
-          <li>
-            下拉選單彙整現有設計參數（assist / primary /
-            functional），降低記憶成本。
-          </li>
-          <li>參數與 Hex 雙向支援：選參數會自動填入 Hex，反之亦然。</li>
-          <li>狀態清楚：預設、Hex 輸入中、已選參數三種樣式區分明確。</li>
-          <li>
-            必填驗證：點擊輸入框後離開若為空，立即顯示紅框與「不得為空」提示。
-          </li>
-          <li>
-            輸入框自動帶入 <code>#</code>，並限制最多 6 碼 Hex
-            字元，避免格式錯誤。
-          </li>
-          <li>
-            智能展開：輸入 1 碼 <code>F</code> 自動補成 <code>#FFFFFF</code>、2
-            碼 <code>14</code> → <code>#141414</code>、3 碼 <code>123</code> →
-            <code>#123123</code>，加快常用色輸入。
-          </li>
-          <li>已有 Hex 時，再次聚焦會自動全選，方便直接覆寫不必手動清除。</li>
-          <li>
-            參數綁定可解除：選參數後 token chip 旁有
-            <code>×</code>，按下會保留 Hex
-            但解除與設計參數的連結，方便切換成寫死色碼。
-          </li>
-        </ul>
       </section>
     </div>
 
@@ -908,6 +1299,125 @@
       }
 
       document.querySelectorAll("[data-picker]").forEach(setupPicker);
+
+      /* ===== 頁籤切換 ===== */
+      const tabs = document.querySelectorAll(".tab");
+      const views = document.querySelectorAll(".view");
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const target = tab.dataset.tab;
+          tabs.forEach((t) => t.classList.toggle("is-active", t === tab));
+          views.forEach((v) =>
+            v.classList.toggle("is-active", v.dataset.view === target),
+          );
+        });
+      });
+
+      /* ===== displayPattern 原版必填驗證 ===== */
+      document.querySelectorAll("[data-dp-legacy]").forEach((input) => {
+        setupValidation(input, input, () => input.value);
+      });
+
+      /* ===== displayPattern 新版 select 元件 ===== */
+      function setupSelect(select) {
+        const control = select.querySelector(".select-control");
+        const valueEl = select.querySelector(".select-value");
+        const options = JSON.parse(select.dataset.options || "[]");
+
+        // 找同 .state 內的 decimal extra 區塊（如果有）
+        const state = select.closest(".state");
+        const decimalExtra = state
+          ? state.querySelector("[data-decimal-extra]")
+          : null;
+
+        // 建立選單
+        const menu = document.createElement("div");
+        menu.className = "select-menu";
+        options.forEach((opt) => {
+          const o = document.createElement("div");
+          o.className = "select-option";
+          o.dataset.value = opt.value;
+          o.textContent = opt.label;
+          if (select.dataset.initial === opt.value)
+            o.classList.add("is-active");
+          menu.appendChild(o);
+        });
+        select.appendChild(menu);
+
+        let touched = false;
+
+        function setError(on) {
+          select.classList.toggle("is-error", on);
+        }
+
+        function selectOption(value, label) {
+          valueEl.textContent = label;
+          valueEl.classList.remove("is-placeholder");
+          select.dataset.value = value;
+          menu.querySelectorAll(".select-option").forEach((el) => {
+            el.classList.toggle("is-active", el.dataset.value === value);
+          });
+          if (decimalExtra) {
+            decimalExtra.classList.toggle("is-visible", value === "decimal");
+          }
+          setError(false);
+        }
+
+        function open() {
+          document.querySelectorAll(".select.is-open").forEach((s) => {
+            if (s !== select) s.classList.remove("is-open");
+          });
+          select.classList.add("is-open");
+        }
+
+        function close() {
+          select.classList.remove("is-open");
+          if (touched && !select.dataset.value) setError(true);
+        }
+
+        control.addEventListener("click", () => {
+          if (select.classList.contains("is-open")) {
+            touched = true;
+            close();
+          } else {
+            open();
+          }
+        });
+
+        control.addEventListener("blur", () => {
+          touched = true;
+          // 延遲一點讓 option 點擊先生效
+          setTimeout(() => {
+            if (
+              !select.classList.contains("is-open") &&
+              !select.dataset.value
+            ) {
+              setError(true);
+            }
+          }, 150);
+        });
+
+        menu.addEventListener("click", (e) => {
+          const opt = e.target.closest(".select-option");
+          if (!opt) return;
+          selectOption(opt.dataset.value, opt.textContent);
+          select.classList.remove("is-open");
+        });
+
+        document.addEventListener("click", (e) => {
+          if (!select.contains(e.target)) {
+            select.classList.remove("is-open");
+          }
+        });
+
+        // 初始化既有 value（從 HTML 既有的 select-value 文字推回 value）
+        if (select.dataset.initial) {
+          const opt = options.find((o) => o.value === select.dataset.initial);
+          if (opt) selectOption(opt.value, opt.label);
+        }
+      }
+
+      document.querySelectorAll("[data-dp-select]").forEach(setupSelect);
     </script>
   </body>
 </html>
